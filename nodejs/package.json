@@ -1,0 +1,33 @@
+{
+  "name": "is",
+  "version": "1.1.1",
+  "description": "new is",
+  "main": "\\",
+  "scripts": {
+    "test": "node main.js"
+  },
+  "author": "LeoSon",
+  "license": "ISC",
+  "dependencies": {
+    "buffer-xor": "^2.0.2",
+    "crypto": "^1.0.1",
+    "crypto-key-composer": "^0.1.3",
+    "date-utils": "^1.2.21",
+    "elliptic": "^6.5.3",
+    "fs": "0.0.1-security",
+    "gps-distance": "0.0.4",
+    "http": "0.0.0",
+    "iplocation": "^6.1.0",
+    "json-groupby": "^1.1.0",
+    "kafka-node": "^5.0.0",
+    "mysql2": "^2.0.0",
+    "net": "^1.0.2",
+    "node-geocoder": "^3.25.0",
+    "node-rdkafka": "^2.7.1-2",
+    "node-zip": "^1.1.1",
+    "os": "^0.1.1",
+    "tracer": "^1.0.1",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.2.1"
+  }
+}

@@ -1,24 +1,16 @@
-const socket = require('./net/socket.js');
-const command = require('./cli/command.js');
-const kafkautil = require('./net/kafkautil.js');
+//
 const config = require('../config/config.js');
-const dbutil = require('./db/dbutil.js');
+const dbUtil = require('./db/dbUtil.js');
+const socket = require('./net/socket.js');
+const kafkaUtil = require('./net/kafkaUtil.js');
 
+// TCP SOCKET
 module.exports.tcpServer = async () => {
-    socket.bindISAServer();
-    socket.bindISA0Server();
+    await socket.bindISAServer();
+    await socket.bindISAgServer();
 }
 
-module.exports.cmd = async () => {
-    command.ListenCommand();
-}
-
+// KAFKA ADMIN
 module.exports.kafka = async () => {
-    await kafkautil.initKafka();
-}
-
-module.exports.dbInitForTest = async () => {
-    if(config.testMode){
-        await dbutil.truncate();
-    }
+    await kafkaUtil.initKafka();
 }

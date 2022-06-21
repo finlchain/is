@@ -1,32 +1,25 @@
-const define = require('../../config/define.js');
-const netutil = require('../net/netutil.js');
-const logger = require('../utils/logger.js');
+//
+const define = require('./../../config/define.js');
+const netUtil = require('./../net/netUtil.js');
+const logger = require('./../utils/winlog.js');
 
+//
 let ctx = new Object();
 let ctxArray = new Array();
 ctx.CTX = ctxArray;
 let ctx_count = 0;
 
-let hwInfo = new Array();
-
 let ctx_map = new Map();
 
-module.exports.hwInfo = function (data) {
-    hwInfo.push(data);
-}
-
-module.exports.hwInfoList = function () {
-    return hwInfo;
-}
-
+//
 module.exports.ctxList = async function (socket) {
 
     let overlap = false;
     overlap = await ctxOverlap(socket);
-    if (netutil.ipUtil(socket, define.division.remoteIP) != netutil.ipUtil(socket, define.division.localhost) && overlap == false) {
+    if (netUtil.ipUtil(socket, define.DIVISION.remoteIP) !== netUtil.ipUtil(socket, define.DIVISION.localhost) && overlap === false) {
         ctx.CTX[ctx_count] = socket;
         ctx_count++;
-        logger.info(ctx);
+        logger.debug(ctx);
         logger.debug(typeof (ctx));
         return ctx;
     }
@@ -47,19 +40,23 @@ module.exports.getSocketCTX = async (remoteAddress) => {
 module.exports.AddSocketCTX = async (socket) => {
     let overlap = ctx_map.get(socket.remoteAddress.slice(7));
 
-    if(overlap === undefined && (netutil.ipUtil(socket, define.division.remoteIP) != netutil.ipUtil(socket, define.division.localhost)))
+    if(overlap === undefined && (netUtil.ipUtil(socket, define.DIVISION.REMOTE_IP) !== netUtil.ipUtil(socket, define.DIVISION.LOCALHOST)))
     {
         ctx_map.set(socket.remoteAddress.slice(7), socket);
     }
 }
 
+module.exports.DelSocketCTX = async (remoteAddress) => {
+    await ctx_map.delete(remoteAddress);
+}
+
 function ctxOverlap(socket) {
-    if (ctx_count == 0) {
+    if (!ctx_count) {
         return false;
     }
     else {
         for (var i = 0; i < ctx_count; i++) {
-            if ((socket.remoteAddress).slice(7) == (ctx.CTX[i]._peername.address).slice(7)) {
+            if ((socket.remoteAddress).slice(7) === (ctx.CTX[i]._peername.address).slice(7)) {
                 return true;
             }
             else {

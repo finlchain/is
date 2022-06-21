@@ -1,6 +1,9 @@
+//
 const http = require('http');
 const request = require('request');
-const util = require("./../utils/common.js");
+
+//
+const util = require("./../utils/commonUtil.js");
 
 const APICall_POST_CB = async(httpConfig, postData) => {
     return new Promise((resolve, reject) => {
@@ -21,7 +24,7 @@ const APICall_POST_CB = async(httpConfig, postData) => {
                 try {
                     concat_resData = Buffer.concat(resData).toString();
 
-                    if(util.isJson(concat_resData))
+                    if(util.isJsonString(concat_resData))
                     {
                         concat_resData = JSON.parse(concat_resData);
                     }
@@ -46,6 +49,10 @@ const APICAll_GET_CB = async(url, propertiesObj) => {
     return new Promise((resolve, reject) => {
         request({url : url, qs : propertiesObj}, (err, response, body) => {
             if(err) reject(err)
+
+            if(response === undefined) {
+                reject(response);
+            }
 
             if(response.statusCode < 200 
                 || response.statusCode >= 500)

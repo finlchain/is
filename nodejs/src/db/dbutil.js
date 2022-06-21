@@ -1,114 +1,126 @@
-const config = require('../../config/config.js');
-const mariaAddon = require('../../../addon/build/Release/MariaAddon');
-const Addonquery = mariaAddon.MariaQuery;
-const logger = require('../utils/logger.js');
+//
+const mysql = require("mysql2/promise");
 
-const user = config.mariaConfig.user;
-const passwd = config.mariaConfig.password;
+//
+const config = require('./../../config/config.js');
+const define = require('./../../config/define.js');
+const util = require('./../utils/commonUtil.js');
+const logger = require('./../utils/winlog.js');
 
-module.exports.node_info = {
-    querys: {
-        insert_node_info: "insert_node_info",
-        set_role: "set_role",
-        set_nn: "set_nn",
-        set_dbn: "set_dbn",
-        state_update_start: "state_update_start",
-        state_update_stop: "state_update_stop",
-        state_update_stop_cluster: "state_update_stop_cluster",
-        node_list: "node_list",
-        nn_list: "nn_list",
-        cluster: "cluster",
-        nn_ip_info: "nn_ip_info",
-        all_ip_info: "all_ip_info",
-        dn_ip_info: "dn_ip_info",
-        dbn_ip_info: "dbn_ip_info",
-        sca0_ip_info: "sca0_ip_info",
-        nn_idc_info: "nn_idc_info",
-        all_list_info: "all_list_info",
-        node_count: "node_count",
-        group_count: "group_count",
-        wallet_list: "wallet_list",
-        master_wallet_list: "master_wallet_list",
-        reward_list: "reward_list"
+//
+const maria_conn_pool = mysql.createPool(config.MARIA_CONFIG);
+
+const dbConfig = config.MARIA_CONFIG;
+module.exports.dbConfig = dbConfig;
+
+//
+var connNum = 0;
+module.exports.getConn = async () => {
+    try {
+        connNum += 1;
+        // logger.warn("getConn connNum " + connNum + " invalid");
+        return await maria_conn_pool.getConnection(async conn => conn);
+    } catch (err) {
+        // debug.error(err);
+        logger.error("getConn Func - Error");
     }
 }
 
-module.exports.hw_info = {
-    querys: {
-        insert_hw_info: "insert_hw_info",
-        cpu_mark_point: "cpu_mark_point"
+module.exports.releaseConn = async (conn) => {
+    try {
+        connNum -= 1;
+        // logger.warn("releaseConn connNum " + connNum + " error");
+        await conn.release();
+    } catch (err) {
+        // debug.error(err);
+        logger.error("releaseConn Func - Error");
     }
 }
 
-module.exports.idc_info = {
-    querys: {
-        total_idc_list: "total_idc_list",
-        idc_list_from_code: "idc_list_from_code",
-        gps_code_hub: "gps_code_hub",
-        designated_idc: "designated_idc",
-        designated_idc2: "designated_idc2",
-        add_hub: "add_hub",
-        add_hub_nocity: "add_hub_nocity",
-        gps_for_cluster: "gps_for_cluster"
+module.exports.exeQueryParam = async (conn, queryV, param) => {
+    return await conn.query(queryV, param);
+}
+
+module.exports.exeQuery = async (conn, queryV) => {
+    return await conn.query(queryV);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+//
+module.exports.queryPre = async (queryV, param) => {
+    logger.debug("func : queryPre");
+
+    const conn = await this.getConn();
+    logger.debug("queryV : " + queryV);
+    logger.debug("param : " + param);
+    [query_result] = await this.exeQueryParam(conn, queryV, param);
+
+    await this.releaseConn(conn);
+
+    // logger.debug("query_result length : " + query_result.length);
+    // for(var i = 0; i < query_result.length; i++)
+    // {
+    //     for ( var keyNm in query_result[i]) {
+    //         logger.debug("key : " + keyNm + ", value : " + query_result[i][keyNm]);
+    //     }
+    // }
+
+    // logger.debug("query_result : " + JSON.stringify(query_result));
+
+    return query_result;
+}
+
+module.exports.query = async (queryV) => {
+    logger.debug("func : query");
+
+    const conn = await this.getConn();
+    logger.debug("queryV : " + queryV);
+    [query_result] = await  this.exeQuery(conn, queryV);
+
+    await this.releaseConn(conn);
+    
+
+    // logger.debug("query_result length : " + query_result.length);
+    // for(var i = 0; i < query_result.length; i++)
+    // {
+    //     for ( var keyNm in query_result[i]) {
+    //         logger.debug("key : " + keyNm + ", value : " + query_result[i][keyNm]);
+    //     }
+    // }
+
+    // logger.debug("query_result : " + JSON.stringify(query_result));
+
+    return query_result;
+}
+
+//
+module.exports.actQuery = async (queryV) => {
+    logger.debug("actQuery queryV : " + queryV);
+    let query_result =  await this.query(queryV);
+
+    logger.info("actQuery result : " + JSON.stringify(query_result));
+}
+
+module.exports.truncate = (dbName) => {
+    let queryV = ``;
+    try{
+        queryV = `TRUNCATE ${dbName}`
+    } catch (err) {
+        // debug.error(err);
+        logger.error("getConn Func");
     }
+
+    return queryV;
 }
 
-module.exports.revision = {
-    querys : {
-        idx: "idx",
-        net_reset: "net_reset",
-        reset_count: "reset_count"
-    }
+//////////////////////////////////////////////////////////////////////////////////////
+//
+const tableAppendix = {
+    "tableName" : `myTableName`,
+    "appendix" : `myAppendix`,
+    "shard_exp" : `_shard`,
+    "innoDB" : `ENGINE=InnoDB`,
+    "spider" : `ENGINE=spider COMMENT='wrapper "mysql", table`,
+    "partition" : `PARTITION BY KEY (subnet_id)`,
 }
-
-module.exports.cluster_info = {
-    querys : {
-        cluster_p2p_addr: "cluster_p2p_addr",
-        cluster_p2p_addr_list: "cluster_p2p_addr_list",
-        cluster_add: "cluster_add",
-        clsuter_del_p2p: "cluster_del_p2p",
-        cluster_del_ip: "cluster_del_ip"
-    }
-}
-
-module.exports.genesisContract = {
-    querys : {
-        hw_id_list: "hw_id_list",
-        ip_from_id: "ip_from_id",
-        snHash_from_ip: "snHash_from_ip"
-    }
-}
-
-module.exports.kafka_info = {
-    querys : {
-        add_broker_list: "add_broker_list",
-        idx_from_broker: "idx_from_broker",
-        kafka_list: "kafka_list",
-        update_topic_list: "update_topic_list",
-        kafka_info: "kafka_info"
-    }
-}
-
-module.exports.queryPre = async (kind, arg) => {
-    return await Addonquery(user, passwd, kind, arg);
-}
-
-module.exports.query = async (kind) => {
-    return await Addonquery(user, passwd, kind);
-}
-
-module.exports.truncate = async () => {
-    let result = await Addonquery(user, passwd, "truncate");
-    if(result == "success")
-        logger.info('[DB] DB Init for Test Success');
-    else
-        logger.info('[DB] DB Init for Test fail');
-}
-
-module.exports.resetDB = async () => {
-    let result = await Addonquery(user, passwd, "reset");
-    if (result == "success")
-        logger.info('[DB] DB Reset Success');
-    else
-        logger.info('[DB] DB Reset fail');
-}
+module.exports.tableAppendix = tableAppendix;
