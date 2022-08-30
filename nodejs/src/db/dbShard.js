@@ -66,6 +66,9 @@ module.exports.createShardUser = async () => {
 }
 
 module.exports.initShard = async () => {
-    await this.dropShardUser();
-    await this.createShardUser();
+    if (config.DB_CREATE_USER === true)
+    {
+        await this.dropShardUser();
+        await this.createShardUser();
+    }
 }

@@ -169,6 +169,9 @@ module.exports.CMD_ENCODING = {
 module.exports.DB_TEST_MODE = false;
 module.exports.DB_TEST_MODE_DROP = false;
 
+//
+module.exports.DB_CREATE_USER = false;
+
 // IP Control
 module.exports.IP_ASSIGN = {
     CTRL : 0,

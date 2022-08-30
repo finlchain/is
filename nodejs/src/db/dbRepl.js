@@ -220,6 +220,9 @@ module.exports.createReplUsers = async () => {
 }
 
 module.exports.initReplication = async () => {
-    // await this.dropReplUsers();
-    await this.createReplUsers();
+    if (config.DB_CREATE_USER === true)
+    {
+        // await this.dropReplUsers();
+        await this.createReplUsers();
+    }
 }

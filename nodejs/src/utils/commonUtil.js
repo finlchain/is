@@ -139,6 +139,17 @@ module.exports.makeFin = (dir, seed) => {
 }
 
 //
+module.exports.getMemInfo = () => {
+    const mem = {
+        freemem: os.freemem(),
+        totalmem: os.totalmem()
+    };
+    mem.available = (mem.freemem * 100 / mem.totalmem).toFixed(2) + '%';
+
+    return mem;
+}
+
+//
 module.exports.checkIP = (ipAddr) => {
     if(define.REGEX.IP_ADDR_REGEX.test(ipAddr))
     {
@@ -238,11 +249,6 @@ module.exports.intToIP = (ipInt) => {
     let part4 = ((ipInt >> 24) & 255);
 
     return part4 + "." + part3 + "." + part2 + "." + part1;
-}
-
-//
-module.exports.getHostname = () => {
-    return (os.hostname());
 }
 
 //
@@ -650,4 +656,18 @@ module.exports.balNum = (balance, amount, decimal_point) => {
     }
 
     return true;
+}
+
+//
+module.exports.date2Timestamp = (strDate) => {
+    const dt = Date.parse(strDate);  
+
+    return dt;
+}
+
+//
+module.exports.timestamp2Date = (ts) => {
+    const td = new Date(ts);
+
+    return td;
 }
