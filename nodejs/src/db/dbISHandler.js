@@ -329,7 +329,7 @@ module.exports.changeNetInfoBgStatus = async (bg_status) => {
 
     logger.debug("changeNetInfoBgStatus bg_status : " + bg_status);
 
-    let systemInfoCnt = await dbUtil.queryPre(dbIS.querys.is.system_info.selectCnt);
+    let systemInfoCnt = await dbUtil.query(dbIS.querys.is.system_info.selectCnt);
     if (systemInfoCnt.length && Number(systemInfoCnt[0].total_count) > 0 )
     {
         // 
